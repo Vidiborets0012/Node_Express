@@ -1,9 +1,11 @@
 import express from 'express';
 import cors from 'cors';
 import pino from 'pino-http';
+import 'dotenv/config';
 
 const app = express();
-const PORT = 3000;
+// const PORT = 3000;
+const PORT = process.env.PORT ?? 3000;
 
 // Логування часу
 app.use((req, res, next) => {
@@ -61,10 +63,14 @@ app.use((req, res) => {
 
 // Middleware для обробки помилок
 app.use((err, req, res, next) => {
-  console.error('Error:', err.message);
+  console.error(err);
+
+  const isProd = process.env.NODE_ENV === 'production';
+
   res.status(500).json({
-    message: 'Internal Server Error',
-    error: err.message,
+    message: isProd
+      ? 'Something went wrong. Please try again later.'
+      : err.message,
   });
 });
 
