@@ -5,6 +5,8 @@ import pino from 'pino-http';
 import 'dotenv/config';
 import { connectMongoDB } from './db/connectMongoDB.js';
 
+import { Student } from './models/student.js';
+
 const app = express();
 // const PORT = 3000;
 const PORT = process.env.PORT ?? 3000;
@@ -35,28 +37,29 @@ app.use(express.json()); // Middleware для парсингу JSON
 app.use(cors()); // Дозволяє запити з будь-яких джерел
 app.use(helmet()); //захист
 
-// Перший маршрут
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Hello world!' });
+// GET /students — список усіх студентів
+app.get('/students', async (req, res) => {
+  const students = await Student.find();
+  res.status(200).json(students);
 });
 
-app.post('/users', (req, res) => {
-  console.log(req.body); // тепер тіло доступне як JS-об’єкт
-  res.status(201).json({ message: 'User created' });
-});
+// GET /students/:studentId — один студент за id
+app.get('/students/:studentId', async (req, res) => {
+  const { studentId } = req.params;
+  const student = await Student.findById(studentId);
 
-// GET-запит до маршруту "/health"
-app.get('/health', (req, res) => {
-  res.status(200).json({
-    status: 'Ok!',
-  });
+  if (!student) {
+    return res.status(404).json({ message: 'Student not found' });
+  }
+
+  res.status(200).json(student);
 });
 
 // Маршрут для тестування middleware помилки
-app.get('/test-error', (req, res) => {
-  // Штучна помилка для прикладу
-  throw new Error('Something went wrong');
-});
+// app.get('/test-error', (req, res) => {
+//   // Штучна помилка для прикладу
+//   throw new Error('Something went wrong');
+// });
 
 // Middleware 404 (після всіх маршрутів)
 app.use((req, res) => {
