@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import pino from 'pino-http';
 import 'dotenv/config';
 
@@ -13,9 +14,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Middleware для парсингу JSON
-app.use(express.json());
-app.use(cors()); // Дозволяє запити з будь-яких джерел
 app.use(
   pino({
     level: 'info',
@@ -32,6 +30,9 @@ app.use(
     },
   }),
 );
+app.use(express.json()); // Middleware для парсингу JSON
+app.use(cors()); // Дозволяє запити з будь-яких джерел
+app.use(helmet()); //захист
 
 // Перший маршрут
 app.get('/', (req, res) => {
