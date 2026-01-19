@@ -7,14 +7,25 @@ import {
   deleteStudent,
   updateStudent,
 } from '../controllers/studentsController.js';
-import { createStudentSchema } from '../validations/studentsValidation.js';
+import {
+  createStudentSchema,
+  studentIdParamSchema,
+} from '../validations/studentsValidation.js';
 
 const router = Router();
 
 router.get('/students', getStudents);
-router.get('/students/:studentId', getStudentById);
+router.get(
+  '/students/:studentId',
+  celebrate(studentIdParamSchema),
+  getStudentById,
+);
 router.post('/students', celebrate(createStudentSchema), createStudent);
-router.delete('/students/:studentId', deleteStudent);
+router.delete(
+  '/students/:studentId',
+  celebrate(studentIdParamSchema),
+  deleteStudent,
+);
 router.patch('/students/:studentId', updateStudent);
 
 export default router;
