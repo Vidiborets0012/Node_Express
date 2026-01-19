@@ -1,4 +1,5 @@
 import { Joi, Segments } from 'celebrate';
+import { isValidObjectId } from 'mongoose';
 
 export const createStudentSchema = {
   [Segments.BODY]: Joi.object({
@@ -27,5 +28,17 @@ export const createStudentSchema = {
     onDuty: Joi.boolean().messages({
       'boolean.base': 'onDuty must be a boolean value',
     }),
+  }),
+};
+
+// Кастомний валідатор для ObjectId
+const objectIdValidator = (value, helpers) => {
+  return !isValidObjectId(value) ? helpers.message('Invalid id format') : value;
+};
+
+// Схема для перевірки параметра studentId
+export const studentIdParamSchema = {
+  [Segments.PARAMS]: Joi.object({
+    studentId: Joi.string().custom(objectIdValidator).required(),
   }),
 };
