@@ -1,6 +1,11 @@
 import { Joi, Segments } from 'celebrate';
 import { isValidObjectId } from 'mongoose';
 
+// Кастомний валідатор для ObjectId
+const objectIdValidator = (value, helpers) => {
+  return !isValidObjectId(value) ? helpers.message('Invalid id format') : value;
+};
+
 export const createStudentSchema = {
   [Segments.BODY]: Joi.object({
     name: Joi.string().min(3).max(30).required().messages({
@@ -31,14 +36,23 @@ export const createStudentSchema = {
   }),
 };
 
-// Кастомний валідатор для ObjectId
-const objectIdValidator = (value, helpers) => {
-  return !isValidObjectId(value) ? helpers.message('Invalid id format') : value;
-};
-
 // Схема для перевірки параметра studentId
 export const studentIdParamSchema = {
   [Segments.PARAMS]: Joi.object({
     studentId: Joi.string().custom(objectIdValidator).required(),
   }),
+};
+
+// Схема для PATCH
+export const updateStudentSchema = {
+  [Segments.PARAMS]: Joi.object({
+    studentId: Joi.string().custom(objectIdValidator).required(),
+  }),
+  [Segments.BODY]: Joi.object({
+    name: Joi.string().min(3).max(30),
+    age: Joi.number().integer().min(12).max(65),
+    gender: Joi.string().valid('male', 'female', 'other'),
+    avgMark: Joi.number().min(2).max(12),
+    onDuty: Joi.boolean(),
+  }).min(1), // важливо: не дозволяємо порожнє тіло
 };

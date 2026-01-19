@@ -10,6 +10,7 @@ import {
 import {
   createStudentSchema,
   studentIdParamSchema,
+  updateStudentSchema,
 } from '../validations/studentsValidation.js';
 
 const router = Router();
@@ -26,6 +27,10 @@ router.delete(
   celebrate(studentIdParamSchema),
   deleteStudent,
 );
-router.patch('/students/:studentId', updateStudent);
+router.patch(
+  '/students/:studentId',
+  celebrate(updateStudentSchema),
+  updateStudent,
+);
 
 export default router;
