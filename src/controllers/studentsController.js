@@ -3,8 +3,31 @@ import createHttpError from 'http-errors';
 
 // Отримати список усіх студентів
 export const getStudents = async (req, res) => {
-  const students = await Student.find();
-  res.status(200).json(students);
+  // Отримуємо параметри пагінації
+  const { page = 1, perPage = 10 } = req.query;
+
+  const skip = (page - 1) * perPage;
+
+  // Створюємо базовий запит до колекції
+  const studentsQuery = Student.find();
+  // const students = await Student.find();
+  // Виконуємо одразу два запити паралельно
+  const [totalItems, students] = await Promise.all([
+    studentsQuery.clone().countDocuments(),
+    studentsQuery.skip(skip).limit(perPage),
+  ]);
+
+  // Обчислюємо загальну кількість «сторінок»
+  const totalPages = Math.ceil(totalItems / perPage);
+
+  // res.status(200).json(students);
+  res.status(200).json({
+    page,
+    perPage,
+    totalItems,
+    totalPages,
+    students,
+  });
 };
 
 // Отримати одного студента за id
