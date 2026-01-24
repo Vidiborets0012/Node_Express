@@ -4,13 +4,22 @@ import createHttpError from 'http-errors';
 // Отримати список усіх студентів
 export const getStudents = async (req, res) => {
   // Отримуємо параметри пагінації
-  const { page = 1, perPage = 10 } = req.query;
+  const { page = 1, perPage = 10, gender, minAvgMark } = req.query;
 
   const skip = (page - 1) * perPage;
 
   // Створюємо базовий запит до колекції
   const studentsQuery = Student.find();
   // const students = await Student.find();
+
+  // Будуємо фільтр
+  if (gender) {
+    studentsQuery.where('gender').equals(gender);
+  }
+  if (minAvgMark) {
+    studentsQuery.where('avgMark').gte(minAvgMark);
+  }
+
   // Виконуємо одразу два запити паралельно
   const [totalItems, students] = await Promise.all([
     studentsQuery.clone().countDocuments(),
