@@ -3,8 +3,8 @@ import createHttpError from 'http-errors';
 
 // Отримати список усіх студентів
 export const getStudents = async (req, res) => {
-  // Отримуємо параметри пагінації
-  const { page = 1, perPage = 10, gender, minAvgMark } = req.query;
+  // Отримуємо параметри запиту
+  const { page = 1, perPage = 10, gender, minAvgMark, search } = req.query;
 
   const skip = (page - 1) * perPage;
 
@@ -12,10 +12,16 @@ export const getStudents = async (req, res) => {
   const studentsQuery = Student.find();
   // const students = await Student.find();
 
-  // Будуємо фільтр
+  // Текстовий пошук по name (працює лише якщо створено текстовий індекс)
+  if (search) {
+    studentsQuery.where({ $text: { $search: search } });
+  }
+
+  // Фільтр за статтю
   if (gender) {
     studentsQuery.where('gender').equals(gender);
   }
+  // Фільтр за середнім балом
   if (minAvgMark) {
     studentsQuery.where('avgMark').gte(minAvgMark);
   }
