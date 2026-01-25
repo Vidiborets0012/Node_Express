@@ -4,7 +4,15 @@ import createHttpError from 'http-errors';
 // Отримати список усіх студентів
 export const getStudents = async (req, res) => {
   // Отримуємо параметри запиту
-  const { page = 1, perPage = 10, gender, minAvgMark, search } = req.query;
+  const {
+    page = 1,
+    perPage = 10,
+    gender,
+    minAvgMark,
+    search,
+    sortBy = '_id',
+    sortOrder = 'asc',
+  } = req.query;
 
   const skip = (page - 1) * perPage;
 
@@ -29,7 +37,11 @@ export const getStudents = async (req, res) => {
   // Виконуємо одразу два запити паралельно
   const [totalItems, students] = await Promise.all([
     studentsQuery.clone().countDocuments(),
-    studentsQuery.skip(skip).limit(perPage),
+    studentsQuery
+      // Додамєдо сортування в ланцюжок методів квері
+      .sort({ [sortBy]: sortOrder })
+      .skip(skip)
+      .limit(perPage),
   ]);
 
   // Обчислюємо загальну кількість «сторінок»
