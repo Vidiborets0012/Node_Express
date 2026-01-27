@@ -1,4 +1,5 @@
 import createHttpError from 'http-errors';
+import bcrypt from 'bcrypt';
 import { User } from '../models/user.js';
 
 export const registerUser = async (req, res, next) => {
@@ -9,7 +10,15 @@ export const registerUser = async (req, res, next) => {
     return next(createHttpError(400, 'Email in use'));
   }
 
-  // Тут далі будемо додавати логіку створення користувача
-  // Поки що відповідаємо порожнім об'єктом
-  res.status(201).json({});
+  // Хешуємо пароль
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  // Створюємо користувача
+  const newUser = await User.create({
+    email,
+    password: hashedPassword,
+  });
+
+  // Відправляємо дані користувача (без пароля) у відповіді
+  res.status(201).json(newUser);
 };
