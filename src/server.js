@@ -2,12 +2,13 @@ import express from 'express';
 import 'dotenv/config';
 import cors from 'cors';
 import helmet from 'helmet';
+import { errors } from 'celebrate';
 import { connectMongoDB } from './db/connectMongoDB.js';
 import { logger } from './middleware/logger.js';
 import { notFoundHandler } from './middleware/notFoundHandler.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import studentsRoutes from './routes/studentsRoutes.js';
-import { errors } from 'celebrate';
+import authRoutes from './routes/authRoutes.js';
 
 const app = express();
 
@@ -23,6 +24,9 @@ app.use(
 ); // 2. Парсинг JSON-тіла
 app.use(cors()); // 3. Дозвіл для запитів з інших доменів
 app.use(helmet()); //захист
+
+//маршрут реєстрації
+app.use(authRoutes);
 
 // підключаємо групу маршрутів студента
 app.use(studentsRoutes);
