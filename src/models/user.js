@@ -20,11 +20,16 @@ const userSchema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-userSchema.pre('save', function (next) {
+// userSchema.pre('save', function (next) {
+//   if (!this.username) {
+//     this.username = this.email;
+//   }
+//   next();
+// });
+userSchema.pre('save', function () {
   if (!this.username) {
     this.username = this.email;
   }
-  next();
 });
 
 // Перевизначаємо метод toJSON

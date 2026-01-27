@@ -2,12 +2,13 @@ import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import { User } from '../models/user.js';
 
-export const registerUser = async (req, res, next) => {
+export const registerUser = async (req, res) => {
   const { email, password } = req.body;
 
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    return next(createHttpError(400, 'Email in use'));
+    // return next(createHttpError(400, 'Email in use'));
+    throw createHttpError(400, 'Email in use');
   }
 
   // Хешуємо пароль
