@@ -1,6 +1,6 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
-import { createSession } from '../services/auth.js';
+import { createSession, setSessionCookies } from '../services/auth.js';
 import { Session } from '../models/session.js';
 import { User } from '../models/user.js';
 
@@ -24,6 +24,9 @@ export const registerUser = async (req, res) => {
 
   // Створюємо нову сесію
   const newSession = await createSession(newUser._id);
+
+  // Викликаємо, передаємо об'єкт відповіді та сесію
+  setSessionCookies(res, newSession);
 
   // Відправляємо дані користувача (без пароля) у відповіді
   res.status(201).json(newUser);
@@ -51,6 +54,9 @@ export const loginUser = async (req, res) => {
 
   // Створюємо нову сесію
   const newSession = await createSession(user._id);
+
+  // Викликаємо, передаємо об'єкт відповіді та сесію
+  setSessionCookies(res, newSession);
 
   res.status(200).json(user);
 };

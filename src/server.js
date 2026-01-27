@@ -2,6 +2,7 @@ import express from 'express';
 import 'dotenv/config';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { errors } from 'celebrate';
 import { connectMongoDB } from './db/connectMongoDB.js';
 import { logger } from './middleware/logger.js';
@@ -24,6 +25,7 @@ app.use(
 ); // 2. Парсинг JSON-тіла
 app.use(cors()); // 3. Дозвіл для запитів з інших доменів
 app.use(helmet()); //захист
+app.use(cookieParser()); //парсер кук
 
 //маршрут реєстрації
 app.use(authRoutes);
