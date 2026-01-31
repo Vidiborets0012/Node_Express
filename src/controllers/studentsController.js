@@ -17,7 +17,9 @@ export const getStudents = async (req, res) => {
   const skip = (page - 1) * perPage;
 
   // Створюємо базовий запит до колекції
-  const studentsQuery = Student.find();
+
+  //// Додаємо критерій пошуку тільки студентів поточного користувача
+  const studentsQuery = Student.find({ userId: req.user._id });
   // const students = await Student.find();
 
   // Текстовий пошук по name (працює лише якщо створено текстовий індекс)
@@ -60,7 +62,11 @@ export const getStudents = async (req, res) => {
 // Отримати одного студента за id
 export const getStudentById = async (req, res) => {
   const { studentId } = req.params;
-  const student = await Student.findById(studentId);
+  // const student = await Student.findById(studentId);
+  const student = await Student.findOne({
+    _id: studentId,
+    userId: req.user._id,
+  });
 
   if (!student) {
     // express v5
@@ -85,6 +91,7 @@ export const deleteStudent = async (req, res) => {
   const { studentId } = req.params;
   const student = await Student.findOneAndDelete({
     _id: studentId,
+    userId: req.user._id,
   });
 
   if (!student) {
@@ -99,7 +106,7 @@ export const updateStudent = async (req, res) => {
   const { studentId } = req.params;
 
   const student = await Student.findOneAndUpdate(
-    { _id: studentId }, // Шукаємо по id
+    { _id: studentId, userId: req.user._id }, // Шукаємо по id
     req.body,
     { new: true }, // повертаємо оновлений документ
   );
