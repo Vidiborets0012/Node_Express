@@ -72,7 +72,11 @@ export const getStudentById = async (req, res) => {
 
 //створювати нового студента
 export const createStudent = async (req, res) => {
-  const student = await Student.create(req.body);
+  const student = await Student.create({
+    ...req.body,
+    // Додаємо властивість userId
+    userId: req.user._id,
+  });
   res.status(201).json(student);
 };
 
