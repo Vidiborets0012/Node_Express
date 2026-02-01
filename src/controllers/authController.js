@@ -1,6 +1,9 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import handlebars from 'handlebars';
+import path from 'node:path';
+import fs from 'node:fs/promises';
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { Session } from '../models/session.js';
 import { User } from '../models/user.js';
@@ -140,12 +143,26 @@ export const requestResetEmail = async (req, res) => {
     { expiresIn: '15m' },
   );
 
+  // 1. Формуємо шлях до шаблона
+  const templatePath = path.resolve('src/templates/reset-password-email.html');
+  // 2. Читаємо шаблон
+  const templateSource = await fs.readFile(templatePath, 'utf-8');
+  // 3. Готуємо шаблон до заповнення
+  const template = handlebars.compile(templateSource);
+  // 4. Формуємо із шаблона HTML документ з динамічними даними
+  const html = template({
+    name: user.username,
+    link: `${process.env.FRONTEND_DOMAIN}/reset-password?token=${resetToken}`,
+  });
+
   try {
     await sendEmail({
       from: process.env.SMTP_FROM,
       to: email,
       subject: 'Reset your password',
-      html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+      // html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+      // 5. Передаємо HTML у функцію надписання пошти
+      html,
     });
   } catch {
     // next(
