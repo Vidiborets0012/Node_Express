@@ -1,8 +1,10 @@
 import createHttpError from 'http-errors';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { createSession, setSessionCookies } from '../services/auth.js';
 import { Session } from '../models/session.js';
 import { User } from '../models/user.js';
+import { sendEmail } from '../utils/sendEmail.js';
 
 export const registerUser = async (req, res) => {
   const { email, password } = req.body;
@@ -119,7 +121,45 @@ export const requestResetEmail = async (req, res) => {
 
   const user = await User.findOne({ email });
 
+  // res.status(200).json({
+  //   message: 'Password reset email sent successfully',
+  // });
+
+  // Якщо користувача нема — навмисно повертаємо ту саму "успішну"
+  // відповідь без відправлення листа (anti user enumeration).
+  if (!user) {
+    return res.status(200).json({
+      message: 'If this email exists, a reset link has been sent',
+    });
+  }
+
+  // Користувач є — генеруємо короткоживучий JWT і відправляємо лист
+  const resetToken = jwt.sign(
+    { sub: user._id, email },
+    process.env.JWT_SECRET,
+    { expiresIn: '15m' },
+  );
+
+  try {
+    await sendEmail({
+      from: process.env.SMTP_FROM,
+      to: email,
+      subject: 'Reset your password',
+      html: `<p>Click <a href="${resetToken}">here</a> to reset your password!</p>`,
+    });
+  } catch {
+    // next(
+    //   createHttpError(500, 'Failed to send the email, please try again later.'),
+    // );
+    // return;
+    throw createHttpError(
+      500,
+      'Failed to send the email, please try again later.',
+    );
+  }
+
+  // Та сама "нейтральна" відповідь
   res.status(200).json({
-    message: 'Password reset email sent successfully',
+    message: 'If this email exists, a reset link has been sent',
   });
 };
