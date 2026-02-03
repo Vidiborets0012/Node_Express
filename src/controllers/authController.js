@@ -200,7 +200,7 @@ export const resetPassword = async (req, res, next) => {
   if (!user) {
     // next(createHttpError(404, 'User not found'));
     // return;
-    throw createHttpError(401, 'User not found');
+    throw createHttpError(404, 'User not found');
   }
 
   // 3. Якщо користувач існує
@@ -210,6 +210,11 @@ export const resetPassword = async (req, res, next) => {
 
   // 4. Інвалідовуємо всі можливі попередні сесії користувача
   await Session.deleteMany({ userId: user._id });
+
+  //Очищення куків
+  res.clearCookie('sessionId');
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
 
   // 5. Повертаємо успішну відповідь
   res.status(200).json({
