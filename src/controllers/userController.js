@@ -1,14 +1,25 @@
 import createHttpError from 'http-errors';
+import { User } from '../models/user.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 export const updateUserAvatar = async (req, res) => {
   // 1. Виводимо об'єкт req.file у консоль (термінал)
   console.log('--- Multer File Object ---');
   console.log(req.file);
   console.log('--------------------------');
+
   if (!req.file) {
     // next(createHttpError(400, 'No file'));
     // return;
     throw createHttpError(400, 'No file');
   }
-  res.status(200).json({ url: '' });
+
+  const result = await saveFileToCloudinary(req.file.buffer);
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { avatar: result.secure_url },
+    { new: true },
+  );
+  res.status(200).json({ url: user.avatar });
 };
